@@ -1,0 +1,9 @@
+informationtechiparth4675_db_user
+
+PUt92k5bN9npKgK7
+
+
+mongodb+srv://informationtechiparth4675_db_user:PUt92k5bN9npKgK7@feedbackiq-cluster.h3wvrvw.mongodb.net/?appName=feedbackiq-cluster
+
+mongodb+srv://informationtechiparth4675_db_user:PUt92k5bN9npKgK7@feedbackiq-cluster.h3wvrvw.mongodb.net/?appName=feedbackiq-cluster
+
