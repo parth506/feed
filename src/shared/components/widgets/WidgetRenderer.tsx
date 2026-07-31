@@ -40,7 +40,7 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
     refetchInterval:
       config.refreshStrategy === "poll" ? config.pollIntervalMs || 10000 : false,
     staleTime: 1000 * 60 * 5, // 5 minutes stale time
-    initialData: fallbackData,
+    placeholderData: fallbackData,
   });
 
   if (!hasPermission) {
@@ -82,6 +82,32 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
   }
 
   const Component = config.component;
-  const propsToPass = data || fallbackData || {};
+  let propsToPass = data || fallbackData || {};
+
+  // Standardize the props interface so it aligns correctly with chart components
+  const responseData = data as any;
+  if (responseData) {
+    if (config.widgetId === "time-series-volume" && Array.isArray(responseData)) {
+      propsToPass = { data: responseData };
+    } else if (config.widgetId === "topic-importance" && Array.isArray(responseData)) {
+      propsToPass = { topics: responseData };
+    } else if (config.widgetId === "category-department-sla" && Array.isArray(responseData)) {
+      propsToPass = { departments: responseData };
+    } else if (config.widgetId === "sentiment-radar" && Array.isArray(responseData)) {
+      propsToPass = { emotions: responseData, timeSeries: [] };
+    } else if (config.widgetId === "realtime-feed" && responseData.latest_feedback) {
+      const formatted = responseData.latest_feedback.map((item: any) => {
+        const sent = item.sentiment.charAt(0).toUpperCase() + item.sentiment.slice(1).toLowerCase();
+        return {
+          id: item.id || String(Math.random()),
+          time: item.created_at ? item.created_at.replace("T", " ").substring(0, 19) : "",
+          sentiment: sent,
+          comment: item.comment || "",
+        };
+      });
+      propsToPass = { feedbacks: formatted };
+    }
+  }
+
   return <Component {...propsToPass} filters={filters} isLoading={isLoading} />;
 };

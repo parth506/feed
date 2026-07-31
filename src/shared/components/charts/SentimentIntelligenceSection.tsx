@@ -28,10 +28,22 @@ export const SentimentIntelligenceSection: React.FC<SentimentIntelligenceProps> 
   emotions,
   timeSeries,
 }) => {
-  const pieData = [
-    { name: "Positive", value: 78, color: "#10b981" },
-    { name: "Neutral", value: 14, color: "#f59e0b" },
-    { name: "Negative", value: 8, color: "#ef4444" },
+  const joyScore = emotions?.find(e => e.emotion.toLowerCase() === "joy")?.percentage || 0;
+  const surpriseScore = emotions?.find(e => e.emotion.toLowerCase() === "surprise")?.percentage || 0;
+  const frustrationScore = emotions?.find(e => e.emotion.toLowerCase() === "frustration")?.percentage || 0;
+  const angerScore = emotions?.find(e => e.emotion.toLowerCase() === "anger")?.percentage || 0;
+  const negativeScore = frustrationScore + angerScore;
+  
+  const totalScore = joyScore + surpriseScore + negativeScore;
+  
+  const pieData = totalScore > 0 ? [
+    { name: "Positive", value: joyScore, color: "#10b981" },
+    { name: "Neutral", value: surpriseScore, color: "#f59e0b" },
+    { name: "Negative", value: Number(negativeScore.toFixed(1)), color: "#ef4444" },
+  ] : [
+    { name: "Positive", value: 0, color: "#10b981" },
+    { name: "Neutral", value: 0, color: "#f59e0b" },
+    { name: "Negative", value: 0, color: "#ef4444" },
   ];
 
   return (

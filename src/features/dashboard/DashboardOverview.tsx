@@ -8,12 +8,6 @@ import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { api } from "@/api";
 import { useToast } from "@/hooks/use-toast";
 import {
-  MOCK_EXECUTIVE_KPIS,
-  MOCK_TIMESERIES,
-  MOCK_EMOTIONS,
-  MOCK_TOPICS,
-  MOCK_RATINGS,
-  MOCK_DEPARTMENTS,
   MOCK_GEO_REGIONS,
   MOCK_CUSTOMER_CLUSTERS,
   MOCK_ML_IMPORTANCE,
@@ -118,20 +112,42 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
   // Map fallback data for each widget
   const getFallbackDataForWidget = (widgetId: string) => {
     switch (widgetId) {
-      case "kpi-overview":
-        return { metrics: MOCK_EXECUTIVE_KPIS };
+      case "kpi-overview": {
+        const total = feedbacks.length;
+        const positive = feedbacks.filter((f) => f.sentiment === "Positive").length;
+        const neutral = feedbacks.filter((f) => f.sentiment === "Neutral").length;
+        const negative = feedbacks.filter((f) => f.sentiment === "Negative").length;
+
+        const avgRating = total > 0 ? ((positive * 5 + neutral * 3 + negative * 1) / total).toFixed(2) : "0.00";
+        const sentimentIdx = total > 0 ? ((positive - negative) / total).toFixed(2) : "0.00";
+        const csat = total > 0 ? ((positive / total) * 100).toFixed(1) : "0.0";
+        const nps = total > 0 ? Math.round(((positive - negative) / total) * 100) : 0;
+
+        return {
+          metrics: [
+            { id: "total_feedback", title: "Total Feedback", value: String(total), change: 0, period: "Live", trend: "up", sparkline: [total], color: "#6366f1" },
+            { id: "feedback_today", title: "Feedback Today", value: String(total), change: 0, period: "Live", trend: "up", sparkline: [total], color: "#3b82f6" },
+            { id: "avg_rating", title: "Average Rating", value: `${avgRating} / 5`, change: 0, period: "Live", trend: "up", sparkline: [Number(avgRating)], color: "#10b981" },
+            { id: "avg_sentiment", title: "Avg Sentiment Index", value: sentimentIdx.startsWith("-") ? sentimentIdx : `+${sentimentIdx}`, change: 0, period: "Live", trend: "up", sparkline: [Number(sentimentIdx)], color: "#8b5cf6" },
+            { id: "response_rate", title: "Response Rate", value: "100%", change: 0, period: "Live", trend: "up", sparkline: [100], color: "#ec4899" },
+            { id: "resolved_issues", title: "Resolved Issues", value: String(positive), change: 0, period: "Live", trend: "up", sparkline: [positive], color: "#14b8a6" },
+            { id: "csat_score", title: "CSAT Score", value: `${csat}%`, change: 0, period: "Live", trend: "up", sparkline: [Number(csat)], color: "#f59e0b" },
+            { id: "nps_score", title: "NPS Score", value: nps >= 0 ? `+${nps}` : String(nps), change: 0, period: "Live", trend: "up", sparkline: [nps], color: "#06b6d4" },
+          ],
+        };
+      }
       case "realtime-feed":
         return { feedbacks };
       case "time-series-volume":
-        return { data: MOCK_TIMESERIES };
+        return { data: [] };
       case "sentiment-radar":
-        return { emotions: MOCK_EMOTIONS, timeSeries: MOCK_TIMESERIES };
+        return { emotions: [], timeSeries: [] };
       case "topic-importance":
-        return { topics: MOCK_TOPICS };
+        return { topics: [] };
       case "feedback-ratings-histogram":
-        return { ratings: MOCK_RATINGS };
+        return { ratings: [] };
       case "category-department-sla":
-        return { departments: MOCK_DEPARTMENTS };
+        return { departments: [] };
       case "geo-sentiment-map":
         return { regions: MOCK_GEO_REGIONS };
       case "customer-rfm-segmentation":

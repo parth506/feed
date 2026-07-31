@@ -14,15 +14,19 @@ import { RatingHistogramItem } from "../../types/analytics";
 
 interface FeedbackDistributionProps {
   ratings: RatingHistogramItem[];
+  lengthDistribution?: { range: string; count: number }[];
 }
 
-export const FeedbackDistributionSection: React.FC<FeedbackDistributionProps> = ({ ratings }) => {
-  const lengthDistribution = [
-    { range: "<50 chars", count: 1840 },
-    { range: "50-150 chars", count: 5420 },
-    { range: "150-300 chars", count: 4890 },
-    { range: "300-500 chars", count: 2150 },
-    { range: ">500 chars", count: 592 },
+export const FeedbackDistributionSection: React.FC<FeedbackDistributionProps> = ({
+  ratings,
+  lengthDistribution: propLengthDistribution,
+}) => {
+  const lengthDistribution = propLengthDistribution || [
+    { range: "<50 chars", count: 0 },
+    { range: "50-150 chars", count: 0 },
+    { range: "150-300 chars", count: 0 },
+    { range: "300-500 chars", count: 0 },
+    { range: ">500 chars", count: 0 },
   ];
 
   return (
