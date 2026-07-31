@@ -1,6 +1,6 @@
 import React from "react";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { CCard, CCardBody, CProgress } from "@coreui/react";
 import { KPIMetric } from "../../types/analytics";
 
 interface KPICardProps {
@@ -12,16 +12,16 @@ export const KPICard: React.FC<KPICardProps> = ({ metric }) => {
   const isNegativeTrend = metric.change < 0;
 
   return (
-    <Card className="relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-950/80 backdrop-blur shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+    <CCard className="relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-950/80 backdrop-blur shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
       {/* Accent Top Border Bar */}
       <div
         className="absolute top-0 left-0 right-0 h-1"
         style={{ backgroundColor: metric.color }}
       />
 
-      <CardContent className="p-5">
+      <CCardBody className="p-5">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 tracking-wide uppercase">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 tracking-wide uppercase m-0">
             {metric.title}
           </p>
           <span
@@ -45,14 +45,14 @@ export const KPICard: React.FC<KPICardProps> = ({ metric }) => {
         </div>
 
         <div className="mt-3 flex items-baseline justify-between">
-          <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+          <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 m-0">
             {metric.value}
           </h3>
         </div>
 
         {/* Mini Sparkline Visualization */}
         <div className="mt-3 flex items-center justify-between gap-2">
-          <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate">
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate m-0">
             {metric.period}
           </p>
           <div className="flex items-end gap-1 h-6 w-20">
@@ -75,17 +75,16 @@ export const KPICard: React.FC<KPICardProps> = ({ metric }) => {
           </div>
         </div>
 
-        {/* Mini Progress Bar */}
-        <div className="mt-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1 overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-500"
-            style={{
-              width: `${Math.min(100, Math.abs(metric.change * 5) + 40)}%`,
-              backgroundColor: metric.color,
-            }}
+        {/* CoreUI Progress Bar */}
+        <div className="mt-3">
+          <CProgress
+            height={4}
+            value={Math.min(100, Math.abs(metric.change * 5) + 40)}
+            style={{ backgroundColor: "#f1f5f9" }}
+            color="primary"
           />
         </div>
-      </CardContent>
-    </Card>
+      </CCardBody>
+    </CCard>
   );
 };

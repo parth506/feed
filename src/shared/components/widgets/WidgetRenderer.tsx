@@ -82,5 +82,6 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
   }
 
   const Component = config.component;
-  return <Component data={data || fallbackData} filters={filters} isLoading={isLoading} />;
+  const propsToPass = data || fallbackData || {};
+  return <Component {...propsToPass} filters={filters} isLoading={isLoading} />;
 };

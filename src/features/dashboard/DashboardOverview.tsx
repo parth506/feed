@@ -1,20 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { ExecutiveOverviewSection } from "@/shared/components/charts/ExecutiveOverviewSection";
-import { RealtimeMonitoringSection } from "@/shared/components/charts/RealtimeMonitoringSection";
-import { TimeSeriesAnalyticsSection } from "@/shared/components/charts/TimeSeriesAnalyticsSection";
-import { SentimentIntelligenceSection } from "@/shared/components/charts/SentimentIntelligenceSection";
-import { TopicAnalyticsSection } from "@/shared/components/charts/TopicAnalyticsSection";
-import { FeedbackDistributionSection } from "@/shared/components/charts/FeedbackDistributionSection";
-import { CategoryAnalyticsSection } from "@/shared/components/charts/CategoryAnalyticsSection";
-import { GeographicalAnalyticsSection } from "@/shared/components/charts/GeographicalAnalyticsSection";
-import { CustomerSegmentationSection } from "@/shared/components/charts/CustomerSegmentationSection";
-import { MLInsightsSection } from "@/shared/components/charts/MLInsightsSection";
-import { AIInsightsSection } from "@/shared/components/charts/AIInsightsSection";
-import { PredictiveAnalyticsSection } from "@/shared/components/charts/PredictiveAnalyticsSection";
-import { CorrelationAnalysisSection } from "@/shared/components/charts/CorrelationAnalysisSection";
-import { OperationalMetricsSection } from "@/shared/components/charts/OperationalMetricsSection";
+import { registerAllAnalyticsWidgets } from "@/shared/registry/analyticsWidgetRegistry";
+import { WidgetRegistry } from "@/shared/registry/WidgetRegistry";
+import { WidgetRenderer } from "@/shared/components/widgets/WidgetRenderer";
+import { ActiveTab } from "@/shared/components/layout/Sidebar";
+import { FilterState } from "@/shared/types/analytics";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
-
+import { api } from "@/api";
+import { useToast } from "@/hooks/use-toast";
 import {
   MOCK_EXECUTIVE_KPIS,
   MOCK_TIMESERIES,
@@ -31,27 +23,19 @@ import {
   MOCK_CORRELATIONS,
   MOCK_OPERATIONAL_AGENTS,
 } from "@/shared/constants/mockAnalytics";
-import { ActiveTab } from "@/shared/components/layout/Sidebar";
-import { FilterState, TimeSeriesPoint, EmotionDistribution, TopicItem, AIInsightItem, ForecastPoint } from "@/shared/types/analytics";
-import { analyticsService } from "@/services/analyticsService";
-import { api } from "@/api";
-import { useToast } from "@/hooks/use-toast";
+
+// Register all widgets on module evaluation
+registerAllAnalyticsWidgets();
 
 interface DashboardOverviewProps {
   activeTab: ActiveTab;
   filters: FilterState;
 }
 
-export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab, filters: _filters }) => {
+export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab, filters }) => {
   const [feedbacks, setFeedbacks] = useState<
     Array<{ id: string; time: string; sentiment: "Positive" | "Neutral" | "Negative"; comment: string }>
   >([]);
-  const [timeSeries, setTimeSeries] = useState<TimeSeriesPoint[]>(MOCK_TIMESERIES);
-  const [emotions, setEmotions] = useState<EmotionDistribution[]>(MOCK_EMOTIONS);
-  const [topics, setTopics] = useState<TopicItem[]>(MOCK_TOPICS);
-  const [aiInsights, setAiInsights] = useState<AIInsightItem[]>(MOCK_AI_INSIGHTS);
-  const [forecast, setForecast] = useState<ForecastPoint[]>(MOCK_FORECAST);
-
   const { toast } = useToast();
 
   const fetchBackendData = async () => {
@@ -82,43 +66,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
         setFeedbacks(formatted);
       }
     } catch (err) {
-      console.warn("Backend API offline/standalone mode:", err);
-    }
-
-    // Fetch feature API v1 data
-    try {
-      const tsData = await analyticsService.getTimeSeries();
-      if (tsData && tsData.length > 0) setTimeSeries(tsData);
-    } catch (err) {
-      console.warn("Time series API fallback:", err);
-    }
-
-    try {
-      const emotionData = await analyticsService.getEmotions();
-      if (emotionData && emotionData.length > 0) setEmotions(emotionData);
-    } catch (err) {
-      console.warn("Emotion API fallback:", err);
-    }
-
-    try {
-      const topicData = await analyticsService.getTopics();
-      if (topicData && topicData.length > 0) setTopics(topicData);
-    } catch (err) {
-      console.warn("Topic API fallback:", err);
-    }
-
-    try {
-      const aiData = await analyticsService.getAIRecommendations();
-      if (aiData && aiData.length > 0) setAiInsights(aiData);
-    } catch (err) {
-      console.warn("AI Insights API fallback:", err);
-    }
-
-    try {
-      const forecastData = await analyticsService.getForecast();
-      if (forecastData && forecastData.length > 0) setForecast(forecastData);
-    } catch (err) {
-      console.warn("Forecast API fallback:", err);
+      console.warn("Backend API offline fallback:", err);
     }
   };
 
@@ -141,7 +89,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
         description: "Stored successfully in MongoDB Atlas cluster.",
       });
     } catch (err) {
-      console.warn("Backend save fallback to local:", err);
+      console.warn("Backend save fallback:", err);
       setFeedbacks((prev) => [
         {
           id: String(Date.now()),
@@ -154,79 +102,71 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
     }
   };
 
+  // Map category matching activeTab selection
+  const isWidgetVisible = (category: string): boolean => {
+    if (activeTab === "dashboard") return true;
+    if (activeTab === "analytics") return ["kpi", "time_series", "categories", "geo", "segmentation", "correlations"].includes(category);
+    if (activeTab === "feedback") return ["stream", "distribution"].includes(category);
+    if (activeTab === "sentiment") return ["sentiment"].includes(category);
+    if (activeTab === "topics") return ["topics"].includes(category);
+    if (activeTab === "insights") return ["ml", "insights"].includes(category);
+    if (activeTab === "prediction") return ["predictions"].includes(category);
+    if (activeTab === "reports") return ["operations"].includes(category);
+    return true;
+  };
+
+  // Map fallback data for each widget
+  const getFallbackDataForWidget = (widgetId: string) => {
+    switch (widgetId) {
+      case "kpi-overview":
+        return { metrics: MOCK_EXECUTIVE_KPIS };
+      case "realtime-feed":
+        return { feedbacks };
+      case "time-series-volume":
+        return { data: MOCK_TIMESERIES };
+      case "sentiment-radar":
+        return { emotions: MOCK_EMOTIONS, timeSeries: MOCK_TIMESERIES };
+      case "topic-importance":
+        return { topics: MOCK_TOPICS };
+      case "feedback-ratings-histogram":
+        return { ratings: MOCK_RATINGS };
+      case "category-department-sla":
+        return { departments: MOCK_DEPARTMENTS };
+      case "geo-sentiment-map":
+        return { regions: MOCK_GEO_REGIONS };
+      case "customer-rfm-segmentation":
+        return { clusters: MOCK_CUSTOMER_CLUSTERS };
+      case "ml-shap-importance":
+        return { importance: MOCK_ML_IMPORTANCE, evaluation: MOCK_ML_EVALUATION };
+      case "ai-executive-digest":
+        return { insights: MOCK_AI_INSIGHTS };
+      case "predictive-forecasting":
+        return { forecast: MOCK_FORECAST };
+      case "correlation-heatmap":
+        return { correlations: MOCK_CORRELATIONS };
+      case "operational-sla-leaderboard":
+        return { agents: MOCK_OPERATIONAL_AGENTS };
+      default:
+        return {};
+    }
+  };
+
+  const allWidgets = WidgetRegistry.getAll();
+
   return (
     <div className="space-y-8 pb-16">
-      {/* 1. Executive Overview */}
-      {(activeTab === "dashboard" || activeTab === "analytics") && (
-        <ExecutiveOverviewSection metrics={MOCK_EXECUTIVE_KPIS} />
-      )}
+      {allWidgets
+        .filter((widget) => isWidgetVisible(widget.category))
+        .map((widget) => (
+          <WidgetRenderer
+            key={widget.widgetId}
+            config={widget}
+            filters={filters}
+            fallbackData={getFallbackDataForWidget(widget.widgetId)}
+          />
+        ))}
 
-      {/* 2. Real-Time Monitoring Stream */}
-      {(activeTab === "dashboard" || activeTab === "feedback") && (
-        <RealtimeMonitoringSection feedbacks={feedbacks} />
-      )}
-
-      {/* 3. Time Series Analytics */}
-      {(activeTab === "dashboard" || activeTab === "analytics") && (
-        <TimeSeriesAnalyticsSection data={timeSeries} />
-      )}
-
-      {/* 4. Sentiment Intelligence */}
-      {(activeTab === "dashboard" || activeTab === "sentiment") && (
-        <SentimentIntelligenceSection emotions={emotions} timeSeries={timeSeries} />
-      )}
-
-      {/* 5. Topic Analytics */}
-      {(activeTab === "dashboard" || activeTab === "topics") && (
-        <TopicAnalyticsSection topics={topics} />
-      )}
-
-      {/* 6. Feedback Distribution */}
-      {(activeTab === "dashboard" || activeTab === "feedback") && (
-        <FeedbackDistributionSection ratings={MOCK_RATINGS} />
-      )}
-
-      {/* 7. Category & Department Analytics */}
-      {(activeTab === "dashboard" || activeTab === "analytics") && (
-        <CategoryAnalyticsSection departments={MOCK_DEPARTMENTS} />
-      )}
-
-      {/* 8. Geographical Analytics */}
-      {(activeTab === "dashboard" || activeTab === "analytics") && (
-        <GeographicalAnalyticsSection regions={MOCK_GEO_REGIONS} />
-      )}
-
-      {/* 9. Customer Segmentation */}
-      {(activeTab === "dashboard" || activeTab === "analytics") && (
-        <CustomerSegmentationSection clusters={MOCK_CUSTOMER_CLUSTERS} />
-      )}
-
-      {/* 10. ML Insights */}
-      {(activeTab === "dashboard" || activeTab === "insights") && (
-        <MLInsightsSection importance={MOCK_ML_IMPORTANCE} evaluation={MOCK_ML_EVALUATION} />
-      )}
-
-      {/* 11. AI Insights */}
-      {(activeTab === "dashboard" || activeTab === "insights") && (
-        <AIInsightsSection insights={aiInsights} />
-      )}
-
-      {/* 12. Predictive Analytics */}
-      {(activeTab === "dashboard" || activeTab === "prediction") && (
-        <PredictiveAnalyticsSection forecast={forecast} />
-      )}
-
-      {/* 13. Correlation Analysis */}
-      {(activeTab === "dashboard" || activeTab === "analytics") && (
-        <CorrelationAnalysisSection correlations={MOCK_CORRELATIONS} />
-      )}
-
-      {/* 14. Operational Metrics */}
-      {(activeTab === "dashboard" || activeTab === "reports") && (
-        <OperationalMetricsSection agents={MOCK_OPERATIONAL_AGENTS} />
-      )}
-
-      {/* Floating Action Button */}
+      {/* Floating Feedback Dialog */}
       <FeedbackDialog onFeedbackSubmit={handleNewFeedbackSubmit} />
     </div>
   );

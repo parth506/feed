@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Maximize2, Minimize2, Info, Download } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CCard, CCardHeader, CCardBody } from "@coreui/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,19 +33,19 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
   };
 
   return (
-    <Card
+    <CCard
       className={`relative rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-950/80 backdrop-blur shadow-sm transition-all duration-200 ${
         isFullscreen
           ? "fixed inset-4 z-50 overflow-auto max-h-[95vh] shadow-2xl border-brand-500"
           : "hover:border-slate-300 dark:hover:border-slate-700"
       } ${className}`}
     >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-slate-100 dark:border-slate-800/60">
+      <CCardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-slate-100 dark:border-slate-800/60 bg-transparent">
         <div>
           <div className="flex items-center gap-2">
-            <CardTitle className="text-base font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
+            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 tracking-tight m-0">
               {title}
-            </CardTitle>
+            </h3>
             {infoText && (
               <span className="cursor-pointer text-slate-400 hover:text-slate-600 dark:hover:text-slate-300" title={infoText}>
                 <Info className="h-4 w-4" />
@@ -53,7 +53,7 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
             )}
           </div>
           {subtitle && (
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 mb-0">
               {subtitle}
             </p>
           )}
@@ -62,7 +62,7 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
         <div className="flex items-center gap-1.5">
           {headerAction}
 
-          {/* Export Dropdown */}
+          {/* Export Dropdown Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
@@ -92,9 +92,9 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
             {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </Button>
         </div>
-      </CardHeader>
+      </CCardHeader>
 
-      <CardContent className="pt-4">{children}</CardContent>
-    </Card>
+      <CCardBody className="pt-4">{children}</CCardBody>
+    </CCard>
   );
 };

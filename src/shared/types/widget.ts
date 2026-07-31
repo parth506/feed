@@ -3,7 +3,7 @@ import { FilterState } from "./analytics";
 
 export type RefreshStrategy = "realtime" | "poll" | "onFilterChange" | "manual";
 
-export interface WidgetConfig<TData = any> {
+export interface WidgetConfig {
   widgetId: string;
   title: string;
   subtitle?: string;
@@ -27,5 +27,5 @@ export interface WidgetConfig<TData = any> {
   pollIntervalMs?: number;
   requiredPermissions: string[];
   filterDependencies: (keyof FilterState)[];
-  component: React.ComponentType<{ data: TData; filters: FilterState; isLoading?: boolean }>;
+  component: React.ComponentType<any>;
 }
