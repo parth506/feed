@@ -7,6 +7,7 @@ import { FilterState } from "@/shared/types/analytics";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { api } from "@/api";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 import {
   MOCK_GEO_REGIONS,
   MOCK_CUSTOMER_CLUSTERS,
@@ -17,7 +18,7 @@ import {
   MOCK_CORRELATIONS,
   MOCK_OPERATIONAL_AGENTS,
 } from "@/shared/constants/mockAnalytics";
-
+import { X } from "lucide-react";
 // Register all widgets on module evaluation
 registerAllAnalyticsWidgets();
 
@@ -98,8 +99,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
 
   // Map category matching activeTab selection
   const isWidgetVisible = (category: string): boolean => {
-    if (activeTab === "dashboard") return true;
-    if (activeTab === "analytics") return ["kpi", "time_series", "categories", "geo", "segmentation", "correlations"].includes(category);
+    if (activeTab === "dashboard") return ["kpi", "insights", "stream"].includes(category);
+    if (activeTab === "analytics") return ["time_series", "categories", "geo", "segmentation", "correlations"].includes(category);
     if (activeTab === "feedback") return ["stream", "distribution"].includes(category);
     if (activeTab === "sentiment") return ["sentiment"].includes(category);
     if (activeTab === "topics") return ["topics"].includes(category);
@@ -168,6 +169,27 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
   };
 
   const allWidgets = WidgetRegistry.getAll();
+  const [activeDrawer, setActiveDrawer] = useState<string | null>(null);
+
+  const getDrawerFeedbacks = () => {
+    if (activeDrawer === "csat_score") {
+      return feedbacks.filter((f) => f.sentiment === "Positive");
+    }
+    if (activeDrawer === "nps_score") {
+      return feedbacks.filter((f) => f.sentiment === "Positive" || f.sentiment === "Negative");
+    }
+    return feedbacks;
+  };
+
+  const getDrawerTitle = () => {
+    if (activeDrawer === "csat_score") return "Customer Satisfaction (CSAT) Comments";
+    if (activeDrawer === "nps_score") return "Net Promoter Score (NPS) Comments";
+    return "Total Feedback Comment Database";
+  };
+
+  const handleMetricClick = (metricId: string) => {
+    setActiveDrawer(metricId);
+  };
 
   return (
     <div className="space-y-8 pb-16">
@@ -179,11 +201,82 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
             config={widget}
             filters={filters}
             fallbackData={getFallbackDataForWidget(widget.widgetId)}
+            onMetricClick={handleMetricClick}
           />
         ))}
 
       {/* Floating Feedback Dialog */}
       <FeedbackDialog onFeedbackSubmit={handleNewFeedbackSubmit} />
+
+      {/* Side Drill-down Drawer */}
+      {activeDrawer && (
+        <>
+          <div
+            className="fixed inset-0 bg-slate-950/20 dark:bg-slate-950/60 backdrop-blur-xs z-40 transition-opacity"
+            onClick={() => setActiveDrawer(null)}
+          />
+          <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-800 shadow-2xl p-6 flex flex-col justify-between animate-slide-in">
+            <div className="space-y-4 flex-1 flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div>
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-slate-50">
+                    {getDrawerTitle()}
+                  </h3>
+                  <span className="text-[10px] text-slate-400 font-medium">
+                    Filtered dynamically from Atlas MongoDB
+                  </span>
+                </div>
+                <button
+                  onClick={() => setActiveDrawer(null)}
+                  className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Scrollable feedback comments */}
+              <div className="space-y-3 flex-1 overflow-y-auto pr-1 py-2">
+                {getDrawerFeedbacks().length === 0 ? (
+                  <p className="text-center text-xs text-slate-400 py-8">
+                    No comments match this segment.
+                  </p>
+                ) : (
+                  getDrawerFeedbacks().map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-3 rounded-lg border border-slate-100 dark:border-slate-900 bg-slate-50/50 dark:bg-slate-900/30 space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span
+                          className={`px-1.5 py-0.5 rounded-full font-bold ${
+                            item.sentiment === "Positive"
+                              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                              : item.sentiment === "Neutral"
+                              ? "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
+                              : "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
+                          }`}
+                        >
+                          {item.sentiment}
+                        </span>
+                        <span className="text-slate-400 font-mono">{item.time}</span>
+                      </div>
+                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-normal">
+                        {item.comment}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="pt-4 border-t mt-4 flex justify-end">
+              <Button size="sm" variant="outline" onClick={() => setActiveDrawer(null)}>
+                Close Panel
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

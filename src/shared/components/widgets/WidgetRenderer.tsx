@@ -11,6 +11,7 @@ interface WidgetRendererProps {
   filters: FilterState;
   fallbackData?: any;
   userPermissions?: string[];
+  [key: string]: any;
 }
 
 export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
@@ -18,6 +19,7 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
   filters,
   fallbackData,
   userPermissions = ["admin", "read:analytics"],
+  ...extraProps
 }) => {
   // Permission Guard Check
   const hasPermission = config.requiredPermissions.every((perm) =>
@@ -109,5 +111,5 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
     }
   }
 
-  return <Component {...propsToPass} filters={filters} isLoading={isLoading} />;
+  return <Component {...propsToPass} {...extraProps} filters={filters} isLoading={isLoading} />;
 };

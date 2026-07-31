@@ -5,14 +5,20 @@ import { KPIMetric } from "../../types/analytics";
 
 interface KPICardProps {
   metric: KPIMetric;
+  onClick?: () => void;
 }
 
-export const KPICard: React.FC<KPICardProps> = ({ metric }) => {
+export const KPICard: React.FC<KPICardProps> = ({ metric, onClick }) => {
   const isPositiveTrend = metric.change > 0;
   const isNegativeTrend = metric.change < 0;
 
   return (
-    <CCard className="relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-950/80 backdrop-blur shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+    <CCard
+      onClick={onClick}
+      className={`relative overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-950/80 backdrop-blur shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 ${
+        onClick ? "cursor-pointer hover:border-brand-500/40" : ""
+      }`}
+    >
       {/* Accent Top Border Bar */}
       <div
         className="absolute top-0 left-0 right-0 h-1"

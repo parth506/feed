@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Search,
   Bell,
@@ -9,6 +9,10 @@ import {
   ChevronDown,
   Layers,
   Check,
+  Activity,
+  Database,
+  Cpu,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +29,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/api";
+
 
 interface NavbarProps {
   onSearchChange?: (query: string) => void;
@@ -39,6 +46,18 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [darkMode, setDarkMode] = useState(false);
   const [searchVal, setSearchVal] = useState("");
+
+  const { data: healthStatus } = useQuery<{ db_status: string; cache_status: string }>({
+    queryKey: ["admin-health"],
+    queryFn: async () => {
+      try {
+        return await api.get("/api/v1/admin/health");
+      } catch {
+        return { db_status: "disconnected", cache_status: "disconnected" };
+      }
+    },
+    refetchInterval: 10000,
+  });
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -125,23 +144,60 @@ export const Navbar: React.FC<NavbarProps> = ({
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="relative h-9 w-9 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100">
                 <Bell className="h-4 w-4" />
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+                {(healthStatus?.db_status !== "healthy" || healthStatus?.cache_status !== "connected") && (
+                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 animate-ping" />
+                )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-80 p-4">
+            <PopoverContent align="end" className="w-80 p-4 glass-card shadow-lg rounded-xl">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                <h4 className="text-xs font-semibold text-slate-900 dark:text-slate-100">AI Risk Notifications</h4>
-                <span className="text-[10px] text-brand-600 dark:text-brand-400 font-medium cursor-pointer">Mark all read</span>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                  <Activity className="h-4 w-4 text-brand-500" /> System Alerts Center
+                </h4>
               </div>
               <div className="space-y-3 mt-3 text-xs">
-                <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 text-rose-800 dark:text-rose-300">
-                  <p className="font-semibold">Checkout Friction Detected</p>
-                  <p className="text-[11px] opacity-90 mt-0.5">14% negative spike in Payment WebKit module.</p>
+                {/* MongoDB Status Alert Card */}
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900/60 border">
+                  <div className="flex items-center gap-2">
+                    <Database className="h-4 w-4 text-slate-400" />
+                    <span className="font-medium text-slate-700 dark:text-slate-300">MongoDB database</span>
+                  </div>
+                  <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                    healthStatus?.db_status === "healthy"
+                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                      : "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
+                  }`}>
+                    <span className={`h-1.5 w-1.5 rounded-full ${healthStatus?.db_status === "healthy" ? "bg-emerald-500" : "bg-rose-500 animate-pulse"}`} />
+                    {healthStatus?.db_status === "healthy" ? "Healthy" : "Offline"}
+                  </span>
                 </div>
-                <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300">
-                  <p className="font-semibold">NPS Benchmark Reached</p>
-                  <p className="text-[11px] opacity-90 mt-0.5">NPS score crossed +56 milestone target.</p>
+
+                {/* Redis Status Alert Card */}
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-slate-900/60 border">
+                  <div className="flex items-center gap-2">
+                    <Cpu className="h-4 w-4 text-slate-400" />
+                    <span className="font-medium text-slate-700 dark:text-slate-300">Redis Cache Pool</span>
+                  </div>
+                  <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                    healthStatus?.cache_status === "connected"
+                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                      : "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
+                  }`}>
+                    <span className={`h-1.5 w-1.5 rounded-full ${healthStatus?.cache_status === "connected" ? "bg-emerald-500" : "bg-rose-500 animate-pulse"}`} />
+                    {healthStatus?.cache_status === "connected" ? "Online" : "Disconnected"}
+                  </span>
                 </div>
+
+                {/* Custom Sentiment Spikes Warnings */}
+                {healthStatus?.db_status !== "healthy" && (
+                  <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 text-rose-800 dark:text-rose-300 flex gap-2">
+                    <AlertCircle className="h-4 w-4 shrink-0 text-rose-500 mt-0.5" />
+                    <div>
+                      <p className="font-bold">Critical Database Error</p>
+                      <p className="text-[10px] opacity-90 mt-0.5">Could not reach MongoDB cluster. Analytics rendering holds stale cache.</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </PopoverContent>
           </Popover>
