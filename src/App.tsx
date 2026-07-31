@@ -1,10 +1,21 @@
 import { useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Navbar } from "@/shared/components/layout/Navbar";
 import { Sidebar, ActiveTab } from "@/shared/components/layout/Sidebar";
 import { HeaderFilters } from "@/shared/components/layout/HeaderFilters";
 import { DashboardOverview } from "@/features/dashboard/DashboardOverview";
 import { FilterState } from "@/shared/types/analytics";
 import { Toaster } from "@/components/ui/toaster";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes cache
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const DEFAULT_FILTERS: FilterState = {
   searchQuery: "",
@@ -31,34 +42,36 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/60 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans antialiased">
-      {/* Top Navigation */}
-      <Navbar
-        onSearchChange={(q) => handleFilterChange({ searchQuery: q })}
-        activeWorkspace={workspace}
-        onSelectWorkspace={setWorkspace}
-      />
+    <QueryClientProvider client={queryClient}>
+      <div className="min-h-screen bg-slate-50/60 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans antialiased">
+        {/* Top Navigation */}
+        <Navbar
+          onSearchChange={(q) => handleFilterChange({ searchQuery: q })}
+          activeWorkspace={workspace}
+          onSelectWorkspace={setWorkspace}
+        />
 
-      {/* Global Interactive Filters Bar */}
-      <HeaderFilters
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        onResetFilters={handleResetFilters}
-      />
+        {/* Global Interactive Filters Bar */}
+        <HeaderFilters
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onResetFilters={handleResetFilters}
+        />
 
-      {/* Main Workspace Layout */}
-      <div className="flex-1 flex overflow-hidden max-w-[1600px] w-full mx-auto">
-        {/* Left Sidebar */}
-        <Sidebar activeTab={activeTab} onSelectTab={setActiveTab} />
+        {/* Main Workspace Layout */}
+        <div className="flex-1 flex overflow-hidden max-w-[1600px] w-full mx-auto">
+          {/* Left Sidebar */}
+          <Sidebar activeTab={activeTab} onSelectTab={setActiveTab} />
 
-        {/* Dashboard Content Body */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <DashboardOverview activeTab={activeTab} filters={filters} />
-        </main>
+          {/* Dashboard Content Body */}
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <DashboardOverview activeTab={activeTab} filters={filters} />
+          </main>
+        </div>
+
+        <Toaster />
       </div>
-
-      <Toaster />
-    </div>
+    </QueryClientProvider>
   );
 }
 
