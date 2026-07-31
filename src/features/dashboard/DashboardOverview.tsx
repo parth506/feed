@@ -32,7 +32,8 @@ import {
   MOCK_OPERATIONAL_AGENTS,
 } from "@/shared/constants/mockAnalytics";
 import { ActiveTab } from "@/shared/components/layout/Sidebar";
-import { FilterState } from "@/shared/types/analytics";
+import { FilterState, TimeSeriesPoint, EmotionDistribution, TopicItem, AIInsightItem, ForecastPoint } from "@/shared/types/analytics";
+import { analyticsService } from "@/services/analyticsService";
 import { api } from "@/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -45,6 +46,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
   const [feedbacks, setFeedbacks] = useState<
     Array<{ id: string; time: string; sentiment: "Positive" | "Neutral" | "Negative"; comment: string }>
   >([]);
+  const [timeSeries, setTimeSeries] = useState<TimeSeriesPoint[]>(MOCK_TIMESERIES);
+  const [emotions, setEmotions] = useState<EmotionDistribution[]>(MOCK_EMOTIONS);
+  const [topics, setTopics] = useState<TopicItem[]>(MOCK_TOPICS);
+  const [aiInsights, setAiInsights] = useState<AIInsightItem[]>(MOCK_AI_INSIGHTS);
+  const [forecast, setForecast] = useState<ForecastPoint[]>(MOCK_FORECAST);
+
   const { toast } = useToast();
 
   const fetchBackendData = async () => {
@@ -76,6 +83,42 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
       }
     } catch (err) {
       console.warn("Backend API offline/standalone mode:", err);
+    }
+
+    // Fetch feature API v1 data
+    try {
+      const tsData = await analyticsService.getTimeSeries();
+      if (tsData && tsData.length > 0) setTimeSeries(tsData);
+    } catch (err) {
+      console.warn("Time series API fallback:", err);
+    }
+
+    try {
+      const emotionData = await analyticsService.getEmotions();
+      if (emotionData && emotionData.length > 0) setEmotions(emotionData);
+    } catch (err) {
+      console.warn("Emotion API fallback:", err);
+    }
+
+    try {
+      const topicData = await analyticsService.getTopics();
+      if (topicData && topicData.length > 0) setTopics(topicData);
+    } catch (err) {
+      console.warn("Topic API fallback:", err);
+    }
+
+    try {
+      const aiData = await analyticsService.getAIRecommendations();
+      if (aiData && aiData.length > 0) setAiInsights(aiData);
+    } catch (err) {
+      console.warn("AI Insights API fallback:", err);
+    }
+
+    try {
+      const forecastData = await analyticsService.getForecast();
+      if (forecastData && forecastData.length > 0) setForecast(forecastData);
+    } catch (err) {
+      console.warn("Forecast API fallback:", err);
     }
   };
 
@@ -125,17 +168,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
 
       {/* 3. Time Series Analytics */}
       {(activeTab === "dashboard" || activeTab === "analytics") && (
-        <TimeSeriesAnalyticsSection data={MOCK_TIMESERIES} />
+        <TimeSeriesAnalyticsSection data={timeSeries} />
       )}
 
       {/* 4. Sentiment Intelligence */}
       {(activeTab === "dashboard" || activeTab === "sentiment") && (
-        <SentimentIntelligenceSection emotions={MOCK_EMOTIONS} timeSeries={MOCK_TIMESERIES} />
+        <SentimentIntelligenceSection emotions={emotions} timeSeries={timeSeries} />
       )}
 
       {/* 5. Topic Analytics */}
       {(activeTab === "dashboard" || activeTab === "topics") && (
-        <TopicAnalyticsSection topics={MOCK_TOPICS} />
+        <TopicAnalyticsSection topics={topics} />
       )}
 
       {/* 6. Feedback Distribution */}
@@ -165,12 +208,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
 
       {/* 11. AI Insights */}
       {(activeTab === "dashboard" || activeTab === "insights") && (
-        <AIInsightsSection insights={MOCK_AI_INSIGHTS} />
+        <AIInsightsSection insights={aiInsights} />
       )}
 
       {/* 12. Predictive Analytics */}
       {(activeTab === "dashboard" || activeTab === "prediction") && (
-        <PredictiveAnalyticsSection forecast={MOCK_FORECAST} />
+        <PredictiveAnalyticsSection forecast={forecast} />
       )}
 
       {/* 13. Correlation Analysis */}
