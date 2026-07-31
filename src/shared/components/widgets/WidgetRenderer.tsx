@@ -1,10 +1,9 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, RefreshCw, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import { WidgetConfig } from "@/shared/types/widget";
 import { FilterState } from "@/shared/types/analytics";
 import { api } from "@/api";
-import { Button } from "@/components/ui/button";
 
 interface WidgetRendererProps {
   config: WidgetConfig;
@@ -33,7 +32,7 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
   }, {} as Record<string, any>);
 
   // TanStack Query for caching, background refetching & invalidation
-  const { data, isLoading, isError, error, refetch } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: [config.widgetId, config.apiEndpoint, activeDependencies],
     queryFn: async () => {
       return await api.get(config.apiEndpoint);
@@ -66,25 +65,8 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
     );
   }
 
-  if (isError) {
-    return (
-      <div className="p-6 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/50 dark:bg-rose-950/20 text-center space-y-3">
-        <AlertTriangle className="h-6 w-6 text-rose-500 mx-auto" />
-        <div>
-          <h4 className="text-xs font-bold text-rose-800 dark:text-rose-300">Widget Fetch Failed</h4>
-          <p className="text-[11px] text-rose-600 dark:text-rose-400 mt-0.5">
-            {error instanceof Error ? error.message : "Failed to load backend analytics"}
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} className="h-7 text-xs gap-1.5 border-rose-200">
-          <RefreshCw className="h-3 w-3" /> Retry
-        </Button>
-      </div>
-    );
-  }
-
   const Component = config.component;
-  let propsToPass = data || fallbackData || {};
+  let propsToPass = (data && !isError) ? data : (fallbackData || {});
 
   // Standardize the props interface so it aligns correctly with chart components
   const responseData = data as any;

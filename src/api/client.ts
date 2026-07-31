@@ -67,7 +67,7 @@ apiClient.interceptors.response.use(
     } else if (status === 403) {
       toast.error("Access denied.");
     } else if (status === 404) {
-      toast.error("API endpoint not found.");
+      console.warn(`[API 404] Endpoint not found: ${error.config?.url}`);
     } else if (status === 429) {
       toast.warning("Too many requests.");
     } else if (status >= 500) {
