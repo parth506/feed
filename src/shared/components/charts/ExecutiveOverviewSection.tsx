@@ -9,7 +9,7 @@ interface ExecutiveOverviewProps {
 }
 
 export const ExecutiveOverviewSection: React.FC<ExecutiveOverviewProps> = ({
-  metrics,
+  metrics = [],
   onMetricClick,
 }) => {
   // Parse metrics dynamically to calculate a unified Business Health Score (0-100)

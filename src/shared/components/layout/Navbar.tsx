@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   Bell,
@@ -44,8 +44,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeWorkspace = "Production Cluster",
   onSelectWorkspace,
 }) => {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [searchVal, setSearchVal] = useState("");
+
+  useEffect(() => {
+    document.documentElement.classList.add("dark");
+  }, []);
 
   const { data: healthStatus } = useQuery<{ db_status: string; cache_status: string }>({
     queryKey: ["admin-health"],
@@ -81,17 +85,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-950/90 backdrop-blur supports-[backdrop-filter]:bg-white/70">
+    <header className="sticky top-0 z-40 w-full border-b border-slate-200/50 dark:border-slate-800 bg-[#0F1322] dark:bg-[#0F1322] backdrop-blur select-none">
       <div className="px-4 h-16 flex items-center justify-between gap-4">
         {/* Left: Brand Logo & Workspace Switcher */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2.5">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-700 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-brand-500/20">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#6366F1] to-indigo-700 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-[#6366F1]/20">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
               <span className="font-bold text-slate-900 dark:text-slate-50 text-lg tracking-tight leading-none flex items-center gap-1.5">
-                FeedbackIQ <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-brand-100 dark:bg-brand-900/50 text-brand-600 dark:text-brand-300">AI Enterprise</span>
+                FeedbackPro <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-brand-100 dark:bg-brand-900/50 text-brand-600 dark:text-brand-300">AI Enterprise</span>
               </span>
             </div>
           </div>

@@ -43,7 +43,7 @@ export function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-slate-50/60 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans antialiased">
+      <div className="min-h-screen bg-[#0B0F19] dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 flex flex-col font-sans antialiased">
         {/* Top Navigation */}
         <Navbar
           onSearchChange={(q) => handleFilterChange({ searchQuery: q })}
@@ -59,12 +59,12 @@ export function App() {
         />
 
         {/* Main Workspace Layout */}
-        <div className="flex-1 flex overflow-hidden max-w-[1600px] w-full mx-auto">
+        <div className="flex-1 flex overflow-hidden w-full mx-auto">
           {/* Left Sidebar */}
           <Sidebar activeTab={activeTab} onSelectTab={setActiveTab} />
 
           {/* Dashboard Content Body */}
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#0B0F19]">
             <DashboardOverview activeTab={activeTab} filters={filters} />
           </main>
         </div>

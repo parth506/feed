@@ -9,7 +9,7 @@ interface AIInsightsProps {
 }
 
 export const AIInsightsSection: React.FC<AIInsightsProps> = ({
-  insights,
+  insights = [],
   onActionTrigger,
 }) => {
   const [resolvedIds, setResolvedIds] = useState<string[]>([]);
