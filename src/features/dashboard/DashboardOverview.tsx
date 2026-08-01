@@ -284,27 +284,27 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
           {activeTab === "dashboard" ? (
             <>
               {/* Row 2: Charts */}
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 items-stretch">
                 {/* Trend line */}
-                <div className="p-5 rounded-xl bg-[#161C30] border border-slate-800/80 shadow-sm space-y-4">
+                <div className="p-5 rounded-xl bg-[#161C30] border border-slate-800/80 shadow-sm space-y-4 flex flex-col justify-between h-full min-h-[280px]">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-xs font-bold text-slate-200">Feedback Trend Over Time</h3>
                       <p className="text-[10px] text-slate-500">Volume and sentiment history</p>
                     </div>
-                    <select className="h-6 px-1.5 rounded bg-[#0B0F19] border border-slate-800 text-[10px] text-slate-400">
+                    <select className="h-6 px-1.5 rounded bg-[#0B0F19] border border-slate-800 text-[10px] text-slate-400 focus:outline-none">
                       <option>Daily</option>
                       <option>Weekly</option>
                     </select>
                   </div>
-                  <div className="h-[220px] w-full flex items-center justify-center text-slate-500 text-xs">
-                    <div className="relative w-full h-full flex flex-col justify-between pt-2">
-                      <svg className="w-full h-36 overflow-visible">
+                  <div className="h-[200px] w-full flex items-center justify-center text-slate-500 text-xs">
+                    <div className="relative w-full h-full flex flex-col justify-between pt-2 min-w-0">
+                      <svg viewBox="0 0 400 150" preserveAspectRatio="none" className="w-full h-36 overflow-visible">
                         <path d="M 0,100 Q 40,80 80,120 T 160,50 T 240,90 T 320,30 T 400,60" fill="none" stroke="#6366F1" strokeWidth="2.5" />
                         <path d="M 0,110 Q 40,95 80,130 T 160,65 T 240,105 T 320,45 T 400,80" fill="none" stroke="#10b981" strokeWidth="2" opacity="0.6" />
                         <path d="M 0,130 Q 40,120 80,140 T 160,110 T 240,130 T 320,95 T 400,120" fill="none" stroke="#ef4444" strokeWidth="2" opacity="0.6" />
                       </svg>
-                      <div className="flex justify-between text-[9px] text-slate-500 border-t border-slate-800/80 pt-1">
+                      <div className="flex justify-between text-[9px] text-slate-500 border-t border-slate-800/80 pt-1 font-mono">
                         <span>May 20</span>
                         <span>Jun 01</span>
                         <span>Jun 10</span>
@@ -315,18 +315,55 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
                 </div>
 
                 {/* Sentiment Analysis */}
-                <div className="p-5 rounded-xl bg-[#161C30] border border-slate-800/80 shadow-sm space-y-4">
+                <div className="p-5 rounded-xl bg-[#161C30] border border-slate-800/80 shadow-sm space-y-4 flex flex-col justify-between h-full min-h-[280px]">
                   <div>
                     <h3 className="text-xs font-bold text-slate-200">Sentiment Analysis</h3>
                     <p className="text-[10px] text-slate-500">Breakdown of customer emotion segments</p>
                   </div>
-                  <div className="flex items-center gap-6 h-[220px]">
+                  <div className="flex items-center gap-6 h-[200px]">
                     <div className="relative w-28 h-28 flex items-center justify-center shrink-0">
-                      <svg className="w-28 h-28 transform -rotate-90">
-                        <circle cx="56" cy="56" r="44" className="stroke-slate-800 fill-none" strokeWidth="12" />
-                        <circle cx="56" cy="56" r="44" className="stroke-[#10b981] fill-none" strokeWidth="12" strokeDasharray="276" strokeDashoffset="77" />
-                        <circle cx="56" cy="56" r="44" className="stroke-[#f59e0b] fill-none" strokeWidth="12" strokeDasharray="276" strokeDashoffset="220" />
-                      </svg>
+                      {/* Circle Gauge SVG */}
+                      {(() => {
+                        const total = totalFeedbackCount > 0 ? totalFeedbackCount : 1;
+                        const posArc = (positiveCount / total) * 276.46;
+                        const neuArc = (neutralCount / total) * 276.46;
+                        const negArc = (negativeCount / total) * 276.46;
+                        return (
+                          <svg className="w-28 h-28 transform -rotate-90">
+                            <circle cx="56" cy="56" r="44" className="stroke-slate-800 fill-none" strokeWidth="12" />
+                            {/* Positive segment */}
+                            <circle
+                              cx="56"
+                              cy="56"
+                              r="44"
+                              className="stroke-[#10b981] fill-none transition-all duration-500"
+                              strokeWidth="12"
+                              strokeDasharray={`${posArc} ${276.46 - posArc}`}
+                              strokeDashoffset="0"
+                            />
+                            {/* Neutral segment */}
+                            <circle
+                              cx="56"
+                              cy="56"
+                              r="44"
+                              className="stroke-[#f59e0b] fill-none transition-all duration-500"
+                              strokeWidth="12"
+                              strokeDasharray={`${neuArc} ${276.46 - neuArc}`}
+                              strokeDashoffset={`${-posArc}`}
+                            />
+                            {/* Negative segment */}
+                            <circle
+                              cx="56"
+                              cy="56"
+                              r="44"
+                              className="stroke-[#ef4444] fill-none transition-all duration-500"
+                              strokeWidth="12"
+                              strokeDasharray={`${negArc} ${276.46 - negArc}`}
+                              strokeDashoffset={`${-(posArc + neuArc)}`}
+                            />
+                          </svg>
+                        );
+                      })()}
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
                         <span className="text-lg font-black text-white">{totalFeedbackCount}</span>
                         <span className="text-[8px] text-slate-500 uppercase font-semibold">Feedbacks</span>
@@ -350,21 +387,21 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
                 </div>
 
                 {/* Category Horizontal Bars */}
-                <div className="p-5 rounded-xl bg-[#161C30] border border-slate-800/80 shadow-sm space-y-4">
+                <div className="p-5 rounded-xl bg-[#161C30] border border-slate-800/80 shadow-sm space-y-4 flex flex-col justify-between h-full min-h-[280px]">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-xs font-bold text-slate-200">Feedback by Category</h3>
                       <p className="text-[10px] text-slate-500">Distribution by feature department</p>
                     </div>
-                    <span className="text-[9px] text-[#6366F1] font-semibold cursor-pointer">View All</span>
+                    <span className="text-[9px] text-[#6366F1] font-semibold cursor-pointer hover:underline">View All</span>
                   </div>
-                  <div className="space-y-2.5 h-[220px] overflow-y-auto pr-1">
+                  <div className="space-y-2.5 h-[200px] overflow-y-auto pr-1">
                     {[
-                      { label: "User Interface / UX", value: "2,487 (19.4%)", pct: 85, color: "bg-[#6366F1]" },
-                      { label: "Performance", value: "1,986 (15.5%)", pct: 70, color: "bg-emerald-500" },
-                      { label: "Payments", value: "1,765 (13.7%)", pct: 60, color: "bg-[#ec4899]" },
-                      { label: "Features", value: "1,543 (12.0%)", pct: 50, color: "bg-amber-500" },
-                      { label: "Customer Support", value: "1,234 (9.6%)", pct: 40, color: "bg-purple-500" }
+                      { label: "User Interface / UX", value: `${Math.round(totalFeedbackCount * 0.45)} (${totalFeedbackCount > 0 ? Math.round((positiveCount/totalFeedbackCount)*100) : 45}%)`, pct: 85, color: "bg-[#6366F1]" },
+                      { label: "Performance", value: `${Math.round(totalFeedbackCount * 0.25)} (25%)`, pct: 70, color: "bg-emerald-500" },
+                      { label: "Payments", value: `${Math.round(totalFeedbackCount * 0.15)} (15%)`, pct: 60, color: "bg-[#ec4899]" },
+                      { label: "Features", value: `${Math.round(totalFeedbackCount * 0.10)} (10%)`, pct: 50, color: "bg-amber-500" },
+                      { label: "Customer Support", value: `${Math.round(totalFeedbackCount * 0.05)} (5%)`, pct: 40, color: "bg-purple-500" }
                     ].map((item, idx) => (
                       <div key={idx} className="space-y-1 text-[10px]">
                         <div className="flex justify-between text-slate-400 font-medium">
@@ -372,7 +409,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
                           <span className="text-slate-300 font-bold">{item.value}</span>
                         </div>
                         <div className="w-full h-1.5 bg-[#0B0F19] rounded-full overflow-hidden">
-                          <div className={`h-full ${item.color}`} style={{ width: `${item.pct}%` }} />
+                          <div className={`h-full ${item.color} transition-all duration-300`} style={{ width: `${item.pct}%` }} />
                         </div>
                       </div>
                     ))}
@@ -381,15 +418,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
               </div>
 
               {/* Row 3: Keywords Cloud, Issues table, Feature Requests */}
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 items-stretch">
                 {/* Keywords Cloud */}
-                <div className="p-5 rounded-xl bg-[#161C30] border border-slate-800/80 shadow-sm space-y-4">
+                <div className="p-5 rounded-xl bg-[#161C30] border border-slate-800/80 shadow-sm space-y-4 flex flex-col justify-between h-full min-h-[250px]">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-xs font-bold text-slate-200">Top Keywords</h3>
                       <p className="text-[10px] text-slate-500">Most mentioned keywords in reviews</p>
                     </div>
-                    <span className="text-[9px] text-[#6366F1] font-semibold cursor-pointer">View All</span>
+                    <span className="text-[9px] text-[#6366F1] font-semibold cursor-pointer hover:underline">View All</span>
                   </div>
                   <div className="flex flex-wrap gap-2.5 justify-center items-center h-[180px] p-2">
                     {[
@@ -410,13 +447,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
                 </div>
 
                 {/* Issues Table */}
-                <div className="p-5 rounded-xl bg-[#161C30] border border-slate-800/80 shadow-sm space-y-4">
+                <div className="p-5 rounded-xl bg-[#161C30] border border-slate-800/80 shadow-sm space-y-4 flex flex-col justify-between h-full min-h-[250px]">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-xs font-bold text-slate-200">Top Recurring Issues</h3>
                       <p className="text-[10px] text-slate-500">Track anomalies and frictions</p>
                     </div>
-                    <span className="text-[9px] text-[#6366F1] font-semibold cursor-pointer">View All</span>
+                    <span className="text-[9px] text-[#6366F1] font-semibold cursor-pointer hover:underline">View All</span>
                   </div>
                   <div className="overflow-x-auto h-[180px]">
                     <table className="w-full text-left text-[10px] border-collapse">
@@ -450,13 +487,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
                 </div>
 
                 {/* Feature Requests list */}
-                <div className="p-5 rounded-xl bg-[#161C30] border border-slate-800/80 shadow-sm space-y-4">
+                <div className="p-5 rounded-xl bg-[#161C30] border border-slate-800/80 shadow-sm space-y-4 flex flex-col justify-between h-full min-h-[250px]">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-xs font-bold text-slate-200">Feature Requests</h3>
                       <p className="text-[10px] text-slate-500">Most requested product additions</p>
                     </div>
-                    <span className="text-[9px] text-[#6366F1] font-semibold cursor-pointer">View All</span>
+                    <span className="text-[9px] text-[#6366F1] font-semibold cursor-pointer hover:underline">View All</span>
                   </div>
                   <div className="space-y-3 h-[180px] overflow-y-auto pr-1">
                     {[
@@ -471,7 +508,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
                           <span className="text-slate-300 font-bold">{item.count}</span>
                         </div>
                         <div className="w-full h-1 bg-[#0B0F19] rounded-full overflow-hidden">
-                          <div className="h-full bg-emerald-500" style={{ width: `${item.pct}%` }} />
+                          <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${item.pct}%` }} />
                         </div>
                       </div>
                     ))}
@@ -480,7 +517,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ activeTab,
               </div>
 
               {/* Row 4: Averages, Demographics, country map & Heatmap */}
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 items-stretch">
                 {/* Average Rating by Page */}
                 <div className="p-5 rounded-xl bg-[#161C30] border border-slate-800/80 shadow-sm space-y-4 xl:col-span-2">
                   <div className="flex items-center justify-between">
