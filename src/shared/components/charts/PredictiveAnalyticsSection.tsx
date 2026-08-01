@@ -16,7 +16,7 @@ interface PredictiveAnalyticsProps {
   forecast: ForecastPoint[];
 }
 
-export const PredictiveAnalyticsSection: React.FC<PredictiveAnalyticsProps> = ({ forecast }) => {
+export const PredictiveAnalyticsSection: React.FC<PredictiveAnalyticsProps> = ({ forecast = [] }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">

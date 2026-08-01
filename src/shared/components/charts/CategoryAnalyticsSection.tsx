@@ -16,7 +16,7 @@ interface CategoryAnalyticsProps {
   departments: DepartmentMetric[];
 }
 
-export const CategoryAnalyticsSection: React.FC<CategoryAnalyticsProps> = ({ departments }) => {
+export const CategoryAnalyticsSection: React.FC<CategoryAnalyticsProps> = ({ departments = [] }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">

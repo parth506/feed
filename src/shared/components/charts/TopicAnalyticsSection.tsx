@@ -16,7 +16,7 @@ interface TopicAnalyticsProps {
   topics: TopicItem[];
 }
 
-export const TopicAnalyticsSection: React.FC<TopicAnalyticsProps> = ({ topics }) => {
+export const TopicAnalyticsSection: React.FC<TopicAnalyticsProps> = ({ topics = [] }) => {
   const keywords = [
     { text: "UI Speed", weight: 98, sentiment: "pos" },
     { text: "Checkout", weight: 88, sentiment: "neg" },

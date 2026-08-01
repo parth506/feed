@@ -7,7 +7,7 @@ interface GeoAnalyticsProps {
   regions: GeographicRegion[];
 }
 
-export const GeographicalAnalyticsSection: React.FC<GeoAnalyticsProps> = ({ regions }) => {
+export const GeographicalAnalyticsSection: React.FC<GeoAnalyticsProps> = ({ regions = [] }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">

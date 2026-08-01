@@ -25,8 +25,8 @@ interface SentimentIntelligenceProps {
 }
 
 export const SentimentIntelligenceSection: React.FC<SentimentIntelligenceProps> = ({
-  emotions,
-  timeSeries,
+  emotions = [],
+  timeSeries = [],
 }) => {
   const joyScore = emotions?.find(e => e.emotion.toLowerCase() === "joy")?.percentage || 0;
   const surpriseScore = emotions?.find(e => e.emotion.toLowerCase() === "surprise")?.percentage || 0;

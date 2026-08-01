@@ -18,7 +18,7 @@ interface FeedbackDistributionProps {
 }
 
 export const FeedbackDistributionSection: React.FC<FeedbackDistributionProps> = ({
-  ratings,
+  ratings = [],
   lengthDistribution: propLengthDistribution,
 }) => {
   const lengthDistribution = propLengthDistribution || [

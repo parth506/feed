@@ -16,7 +16,7 @@ interface CustomerSegmentationProps {
   clusters: CustomerClusterPoint[];
 }
 
-export const CustomerSegmentationSection: React.FC<CustomerSegmentationProps> = ({ clusters }) => {
+export const CustomerSegmentationSection: React.FC<CustomerSegmentationProps> = ({ clusters = [] }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">

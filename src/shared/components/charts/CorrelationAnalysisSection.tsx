@@ -6,7 +6,7 @@ interface CorrelationAnalysisProps {
   correlations: CorrelationMetric[];
 }
 
-export const CorrelationAnalysisSection: React.FC<CorrelationAnalysisProps> = ({ correlations }) => {
+export const CorrelationAnalysisSection: React.FC<CorrelationAnalysisProps> = ({ correlations = [] }) => {
   const getCellColor = (coeff: number) => {
     if (coeff > 0.7) return "bg-emerald-500 text-white font-bold";
     if (coeff > 0.3) return "bg-emerald-200 text-emerald-900 font-semibold";

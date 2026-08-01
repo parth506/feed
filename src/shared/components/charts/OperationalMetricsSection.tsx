@@ -7,7 +7,7 @@ interface OperationalMetricsProps {
   agents: OperationalAgent[];
 }
 
-export const OperationalMetricsSection: React.FC<OperationalMetricsProps> = ({ agents }) => {
+export const OperationalMetricsSection: React.FC<OperationalMetricsProps> = ({ agents = [] }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">

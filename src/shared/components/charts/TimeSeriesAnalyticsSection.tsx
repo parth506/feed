@@ -18,7 +18,7 @@ interface TimeSeriesProps {
   data: TimeSeriesPoint[];
 }
 
-export const TimeSeriesAnalyticsSection: React.FC<TimeSeriesProps> = ({ data }) => {
+export const TimeSeriesAnalyticsSection: React.FC<TimeSeriesProps> = ({ data = [] }) => {
   const [granularity, setGranularity] = useState<"daily" | "weekly" | "monthly">("daily");
 
   return (
