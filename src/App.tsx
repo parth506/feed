@@ -15,3 +15,5 @@ export function AppProviders({ children }: { children: ReactNode }) {
     </QueryClientProvider>
   );
 }
+
+export default AppProviders;
